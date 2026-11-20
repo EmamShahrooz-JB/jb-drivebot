@@ -1,0 +1,45 @@
+{
+  "name": "jb-drivebot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JB-DriveBot — production Telegram bot + Google Drive file manager",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/src/index.js",
+    "dev": "tsx watch src/index.ts",
+    "auth": "tsx auth-local/src/cli.ts",
+    "auth:build": "tsc -p tsconfig.auth.json",
+    "migrate": "tsx scripts/migrate.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "smoke": "tsx scripts/smoke.ts",
+    "schema:sync": "node scripts/sync-schema.mjs"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "better-sqlite3": "^11.5.0",
+    "dotenv": "^16.4.5",
+    "grammy": "^1.30.0",
+    "pg": "^8.13.1",
+    "yauzl": "^3.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.10",
+    "@types/yauzl": "^2.10.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,38 @@
+# Local / self-hosted stack. On Altare App Hosting you only need the `app`
+# service (or just the Dockerfile); managed Postgres is provided by the platform.
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DB_DRIVER: postgres
+      DATABASE_URL: postgres://jbd:jbd_local_password@db:5432/jbdrivebot?sslmode=disable
+      DATA_DIR: /app/data
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - jbd-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: jbd
+      POSTGRES_PASSWORD: jbd_local_password
+      POSTGRES_DB: jbdrivebot
+    volumes:
+      - jbd-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jbd -d jbdrivebot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  jbd-data:
+  jbd-db:

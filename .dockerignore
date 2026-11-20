@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-auth
+data
+tmp
+backups
+coverage
+.git
+.env
+.env.*
+!/.env.example
+tests
+*.md
