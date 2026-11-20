@@ -107,6 +107,23 @@ export function registerCommands(env: BotEnv, bot: Bot): void {
 
   bot.command('connect', async (ctx) => {
     await guard(async () => {
+      if (!app.config.googleConfigured) {
+        await send(
+          ctx,
+          [
+            `${ICONS.warn} <b>اعتبارنامه Google تنظیم نشده است</b>`,
+            '',
+            'روی سرور این دو متغیر خالی هستند:',
+            '• <code>GOOGLE_CLIENT_ID</code>',
+            '• <code>GOOGLE_CLIENT_SECRET</code>',
+            '',
+            'طبق README (گام ۲ و ۳) یک پروژه Google Cloud بسازید، Drive API را فعال کنید و یک OAuth Client از نوع <b>Desktop app</b> بگیرید، سپس مقادیر را در Altare → Environment Variables بگذارید تا اپ دوباره دیپلوی شود.',
+            '',
+            '<i>بقیه ربات (آپلود، صف، آمار، ابزار محلی) آماده است و بعد از آن فعال می‌شود.</i>',
+          ].join('\n')
+        );
+        return;
+      }
       if (!env.pairing || !app.config.ENABLE_PAIRING_SERVER) {
         await send(ctx, `${ICONS.err} سرویس جفت‌سازی روی این استقرار فعال نیست.`);
         return;

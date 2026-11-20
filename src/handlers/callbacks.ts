@@ -117,6 +117,19 @@ export async function handleCallback(env: BotEnv, ctx: Context, payload: string)
             await edit(ctx, view.text, { reply_markup: view.keyboard });
             return;
           }
+          if (!app.config.googleConfigured) {
+            await edit(
+              ctx,
+              [
+                `${ICONS.warn} <b>اعتبارنامه Google تنظیم نشده است</b>`,
+                '',
+                '<code>GOOGLE_CLIENT_ID</code> و <code>GOOGLE_CLIENT_SECRET</code> را در Altare → Environment Variables بگذارید (README گام ۲ و ۳).',
+                'پس از دیپلوی مجدد، همین دکمه کار می‌کند.',
+              ].join('\n'),
+              { reply_markup: mainMenu(env.sign) }
+            );
+            return;
+          }
           if (!env.pairing) {
             await edit(ctx, `${ICONS.err} سرویس جفت‌سازی فعال نیست.`, { reply_markup: mainMenu(env.sign) });
             return;

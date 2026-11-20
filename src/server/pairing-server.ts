@@ -137,7 +137,19 @@ export function createPairingServer(ctx: AppContext, opts: PairingServerOptions)
    * expects and which OAuth client to use. No secret is returned: an OAuth
    * desktop client_id is public by design.
    */
+  const googleNotConfigured = (res: http.ServerResponse): boolean => {
+    if (ctx.config.googleConfigured) return false;
+    json(res, 503, {
+      ok: false,
+      error: 'google_not_configured',
+      message:
+        'GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET روی سرور تنظیم نشده‌اند. ابتدا پروژه Google Cloud و OAuth Desktop Client را بسازید (README گام ۲ و ۳).',
+    });
+    return true;
+  };
+
   const handlePrepare = async (code: string, res: http.ServerResponse): Promise<void> => {
+    if (googleNotConfigured(res)) return;
     const normalized = code.trim().toUpperCase();
     if (!normalized) {
       json(res, 400, { ok: false, error: 'bad_request', message: 'code is required' });
@@ -167,6 +179,7 @@ export function createPairingServer(ctx: AppContext, opts: PairingServerOptions)
   };
 
   const handleComplete = async (req: http.IncomingMessage, res: http.ServerResponse): Promise<void> => {
+    if (googleNotConfigured(res)) return;
     const ip = req.socket.remoteAddress ?? 'unknown';
     if (!withinRateLimit(ip)) {
       json(res, 429, { ok: false, error: 'rate_limited', message: 'too many attempts' });

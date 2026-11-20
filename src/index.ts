@@ -22,6 +22,12 @@ async function main(): Promise<void> {
     maxTelegramDownload: formatBytes(config.MAX_TELEGRAM_DOWNLOAD_BYTES),
   });
 
+  if (!config.googleConfigured) {
+    logger.warn(
+      'GOOGLE_CLIENT_ID/SECRET are not set: the bot will run, but Google Drive features stay disabled until they are configured'
+    );
+  }
+
   const app = await createContext(config);
   registerJobHandlers(app);
 

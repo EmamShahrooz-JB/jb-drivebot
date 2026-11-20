@@ -46,8 +46,13 @@ const schema = z.object({
   PAIRING_MAX_ATTEMPTS: int(5, 1, 20),
 
   // ---------- Google OAuth ----------
-  GOOGLE_CLIENT_ID: z.string().min(10, 'GOOGLE_CLIENT_ID is required'),
-  GOOGLE_CLIENT_SECRET: z.string().min(5, 'GOOGLE_CLIENT_SECRET is required'),
+  /**
+   * Optional at boot so the bot can be deployed and verified before the Google
+   * Cloud project exists. Every Google-dependent path is gated on
+   * `googleConfigured` and fails with a clear, actionable message.
+   */
+  GOOGLE_CLIENT_ID: z.string().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().default(''),
   /**
    * Least privilege by default:
    *  file     -> drive.file      (only files this app created/opened)
@@ -116,6 +121,8 @@ export interface AppConfig extends Omit<RawConfig, 'ADMIN_USER_IDS'> {
   tmpDir: string;
   backupDir: string;
   redirectUri: string;
+  /** true when both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are present */
+  googleConfigured: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -150,9 +157,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     );
   }
 
+  const googleConfigured = raw.GOOGLE_CLIENT_ID.length >= 10 && raw.GOOGLE_CLIENT_SECRET.length >= 5;
+  if (googleConfigured && !raw.GOOGLE_CLIENT_ID.includes('.apps.googleusercontent.com')) {
+    // not fatal: some deployments use a proxy, but surface the likely typo
+    // eslint-disable-next-line no-console
+    console.warn('GOOGLE_CLIENT_ID does not look like a Google OAuth client id');
+  }
+
   return {
     ...raw,
     ADMIN_USER_IDS: admins,
+    googleConfigured,
     OWNER_ID: admins[0]!,
     dataDir,
     tmpDir,
